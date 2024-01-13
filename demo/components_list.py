@@ -30,7 +30,11 @@ async def components_view() -> list[AnyComponent]:
             components=[
                 c.Heading(text='Server Load', level=2),
                 c.Paragraph(text='Even simpler example of server load, replacing existing content.'),
-                c.FormFieldInput(name='test', title=f'Thread ID: is abstracted away for now', initial='data'),
+                c.Form(
+                    display_mode=None,
+                    submit_url='/',
+                    form_fields=[c.FormFieldInput(name='test', title=f'Thread ID: is abstracted away for now', initial='data')],
+                ),
                 c.Button(text='Shows that we created and managed to store a thread id in our db', on_click=PageEvent(name='server-load-thread-info')),
                 c.Div(
                     components=[
@@ -105,10 +109,16 @@ async def thread_view() -> list[AnyComponent]:
         logger.info(f"Existing thread ID found: {thread_id}")
 
     thread_data=client.beta.threads.retrieve(thread_id=f'{thread_id}')
-    messages = client.beta.threads.messages.list(thread_id=f'{thread_id}')
+    messages = client.beta.threads.messages.list(thread_id=f'thread_XyBIO891EOEdlfEASAgm66zv')
+    output_text = ""
+    for message in messages.data:
+            if message.role == "assistant":  # Filter messages by the assistant role
+                for content_piece in message.content:
+                    if content_piece.type == "text":
+                        output_text += f"{content_piece.text.value}\n"
 #create and add message to empty thread
 
     return [
         c.Paragraph(text=f'{thread_data}'),
-        c.Paragraph(text=f'{messages.data}')
+        c.Paragraph(text=f'{output_text}')
             ]
