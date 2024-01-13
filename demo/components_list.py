@@ -124,13 +124,15 @@ async def thread_view() -> list[AnyComponent]:
         logger.info(f'Existing thread ID found: {thread_id}')
 
     thread_data = client.beta.threads.retrieve(thread_id=f'{thread_id}')
-    messages = client.beta.threads.messages.list(thread_id='thread_XyBIO891EOEdlfEASAgm66zv')
-    output_text = ''
+    messages = client.beta.threads.messages.list(thread_id='thread_XyBIO891EOEdlfEASAgm66zv', order='asc')
+    messages_list = []
     for message in messages.data:
-        if message.role == 'assistant':  # Filter messages by the assistant role
+        if message.role == 'assistant' or message.role == 'user':  # Filter messages by the assistant and user roles
             for content_piece in message.content:
                 if content_piece.type == 'text':
-                    output_text += f'{content_piece.text.value}\n'
-    # create and add message to empty thread
+                    # Prefix the message with the role for differentiation
+                    message_text = f'{message.role.capitalize()}:\n\n {content_piece.text.value}'
+                    messages_list.append(c.Markdown(text=message_text))
 
-    return [c.Paragraph(text=f'{thread_data}'), c.Paragraph(text=f'{output_text}')]
+    # Return a list of Paragraph components, one for each message
+    return [c.Paragraph(text=f'{thread_data}')] + messages_list
