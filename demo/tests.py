@@ -67,4 +67,5 @@ def test_menu_links(url: str):
     data = r.json()
     assert isinstance(data, list)
 
+
 # TODO tests for forms, including submission
